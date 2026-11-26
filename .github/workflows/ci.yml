@@ -24,12 +24,13 @@ jobs:
         run: npm test
 
       - name: Check secrets (lengths only)
+        if: github.ref == 'refs/heads/main'
         run: |
           echo "user length: ${#U}"
           echo "token length: ${#T}"
         env:
           U: ${{ secrets.DOCKERHUB_USERNAME }}
-          T: ${{ secrets.DOCKERHUB_TOKEN }} 
+          T: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to Docker Hub
         if: github.ref == 'refs/heads/main'
