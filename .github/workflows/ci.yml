@@ -23,7 +23,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-       - name: Log in to Docker Hub
+      - name: Log in to Docker Hub
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
@@ -31,12 +31,15 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build image
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devops-demo:${{ github.sha }} \
-                       -t ${{ secrets.DOCKERHUB_USERNAME }}/devops-demo:latest .
+        run: docker build -t devops-demo:${{ github.sha }} .
 
       - name: Push image
         if: github.ref == 'refs/heads/main'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-demo:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-demo:latest
+          image="$DOCKERHUB_USERNAME/devops-demo"
+          docker tag "devops-demo:$GITHUB_SHA" "$image:$GITHUB_SHA"
+          docker tag "devops-demo:$GITHUB_SHA" "$image:latest"
+          docker push "$image:$GITHUB_SHA"
+          docker push "$image:latest"
